@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de Búsqueda</title>
+    <!-- Cargar estilos de Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/src/output.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #6f7fd6, #4b4e6d);
+            --purple-custom: #6f7fd6;
+            --black-custom: #4b4e6d;
+        }
+
+        #search-results {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .product {
+            display: flex;
+            width: 700px;
+            margin: 1rem;
+            background-color: #000;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .product img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 1rem;
+            margin-right: 1rem;
+        }
+
+        .product-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gradient-to-b from-purple-custom to-black-custom min-h-screen flex flex-col">
+
+    <div id="search-results" class="container mx-auto p-4">
+        <!-- Aquí se mostrarán los resultados de la búsqueda -->
+    </div>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        function showAlert(message, type) {
+            const alertContainer = document.createElement('div');
+            alertContainer.className = `
+                fixed inset-0 flex items-center justify-center z-50
+                bg-black bg-opacity-50
+            `;
+
+            const alert = document.createElement('div');
+            alert.className = `
+                bg-white rounded-lg shadow-lg px-6 py-4
+                max-w-sm mx-auto text-center relative
+            `;
+            alert.role = 'alert';
+            alert.innerHTML = `
+                <strong class="font-bold text-black">${type === 'success' ? 'Éxito!' : 'Error!'}</strong>
+                <span class="block sm:inline text-black">${message}</span>
+                <button class="absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900" onclick="closeAlert(this)">
+                    <svg class="fill-current h-6 w-6" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M14.348 14.849a1 1 0 01-.707-.293l-3.647-3.646-3.647 3.646a1 1 0 01-1.414-1.414l3.646-3.647-3.646-3.647a1 1 0 011.414-1.414l3.647 3.646 3.647-3.646a1 1 0 011.414 1.414l-3.646 3.647 3.646 3.647a1 1 0 01-.707 1.707z"/>
+                    </svg>
+                </button>
+                <div class="mt-4">
+                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 active:bg-blue-400 transition-colors duration-300 ease-in-out transform hover:scale-105 focus:outline-none" onclick="closeAlert(this)">Aceptar</button>
+                </div>
+            `;
+
+            alertContainer.appendChild(alert);
+            document.body.appendChild(alertContainer);
+        }
+
+        function closeAlert(button) {
+            const alertContainer = button.closest('.fixed');
+            alertContainer.remove();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchTerm = urlParams.get('q');
+
+            const apiKey = 'sk_test_575455ab0ec53162e74107638d95109373ae21b8f5f69';
+            const url = `https://api.chec.io/v1/products?query=${encodeURIComponent(searchTerm)}`;
+
+            const options = {
+                method: 'GET',
+                headers: {
+                    'X-Authorization': apiKey
+                }
+            };
+
+            fetch(url, options)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener los datos de la búsqueda');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const products = data.data;
+                    let searchResultsHTML = '';
+
+                    products.forEach(product => {
+                        searchResultsHTML += `
+                            <div class="product text-gray-200 ">
+                                <img src="${product.image.url}" alt="${product.name}">
+                                <div class="product-info">
+                                    <h2 class="text-2xl font-bold text-gray-200 mb-2">${product.name}</h2>
+                                    <p class="text-gray-200 mb-2">${product.description}</p>
+                                    <p class="text-gray-400 mb-4">${product.price.formatted_with_symbol}</p>
+                                    <div class="product-buttons">
+                                        <button class="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-800 active:bg-orange-400 transition-colors duration-300 ease-in-out transform hover:scale-105 focus:outline-none add-to-cart" data-id="${product.id}" data-name="${product.name}" data-price="${product.price.raw}" data-image="${product.image.url}">Agregar al carrito</button>
+                                        <button class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 active:bg-blue-400 transition-colors duration-300 ease-in-out transform hover:scale-105 focus:outline-none view-product" data-id="${product.id}">Ver Producto</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    const searchResultsContainer = document.getElementById('search-results');
+                    searchResultsContainer.innerHTML = searchResultsHTML;
+
+                    document.querySelectorAll('.add-to-cart').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const id = this.getAttribute('data-id');
+                            const name = this.getAttribute('data-name');
+                            const price = parseFloat(this.getAttribute('data-price'));
+                            const image = this.getAttribute('data-image');
+
+                            cart.push({ id, name, price, image });
+                            saveCart();
+                            showAlert(`${name} ha sido agregado al carrito.`, 'success');
+                        });
+                    });
+
+                    document.querySelectorAll('.view-product').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const id = this.getAttribute('data-id');
+                            window.location.href = `product.html?id=${id}`;
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const searchResultsContainer = document.getElementById('search-results');
+                    searchResultsContainer.innerHTML = `<p>Error al cargar los resultados de la búsqueda.</p>`;
+                });
+        });
+    </script>
+
+</body>
+</html>

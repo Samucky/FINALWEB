@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Website</title>
+    <link rel="stylesheet" href="/src/output.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <style>
+        /* Custom styles for the mobile menu */
+        #mobileMenu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            
+            background: rgba(181, 178, 178, 0.741); /* Lighter background for better visibility */
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 40;
+        }
+
+        #mobileMenu.open {
+            transform: translateX(0);
+        }
+
+        #menuClose {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+
+        #mobileMenu .menu-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 2rem;
+            justify-content: center; /* Center items vertically */
+        }
+
+        #mobileMenu .menu-content button {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        #mobileMenu .menu-content img {
+            width: 32px;
+            height: 32px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gradient-to-b from-purple-custom to-black-custom min-h-screen flex flex-col">
+    <nav class="flex items-center justify-between px-6 py-4 border-b border-yellow-900">
+        <div class="flex-grow flex justify-center lg:justify-start">
+            <input type="text" placeholder="Buscar..." id="searchInput" class="bg-black text-white placeholder-gray-500 px-4 py-2 rounded-full border border-white focus:outline-none focus:ring-2 focus:ring-yellow-500 lg:w-1/3 w-2/4">
+        </div>
+        
+        <button id="menuToggle" class="lg:hidden flex items-center text-white h-16 w-16">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+            <img src="/src/images/menu.png" alt="">
+        </button>
+
+        <div class="space-x-4 flex items-center hidden lg:flex">
+          
+            <button class="h-14 w-14" onclick="window.location.href='../../login/html/login.html'">
+                <img src="/src/images/cerrar-sesion.png" alt="Icono de cerrar sesión">
+            </button>
+            <button class="h-14 w-14" onclick="window.location.href='cart.html'">
+                <img src="/src/images/carrito-de-compras.png" alt="Icono de carrito">
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="transform translate-x-full">
+        <div class="menu-content flex flex-col h-full">
+            <button id="menuClose" class="text-gray-800 text-2xl">
+                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <button class="flex items-center mb-4" onclick="window.location.href='../../login/html/login.html'">
+                <img src="/src/images/cerrar-sesion.png" alt="Icono de cerrar sesión" class="h-12 w-12 object-cover mr-2">
+                <span class="text-gray-800">Cerrar sesión</span>
+            </button>
+            <button class="flex items-center" onclick="window.location.href='cart.html'">
+                <img src="/src/images/carrito-de-compras.png" alt="Icono de carrito" class="h-12 w-12 object-cover mr-2">
+                <span class="text-gray-800">Carrito</span>
+            </button>
+        </div>
+    </div>
+
+    <header class="flex flex-col items-center justify-center text-center py-16 bg-opacity-50 bg-zinc-800">
+        <h1 class="text-6xl font-bold text-white mb-4">Lo mejor está por venir</h1>
+        <p class="text-white text-lg mb-8 max-w-3xl mx-auto">Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta provident quisquam, odio aut ex architecto aperiam itaque quidem, hic harum omnis temporibus quibusdam tenetur sapiente in sint facilis veritatis totam!</p>
+        <div class="bg-orange-500 text-white px-8 py-4 rounded-full text-lg hover:bg-orange-700 active:bg-orange-600 transition-colors duration-300 transform hover:scale-105">Shop Now</div>
+    </header>
+    <main class="flex-grow container mx-auto py-12">
+        <h1 class="text-4xl text-center text-white mb-12">Los Más Vendidos y las Mejores Ofertas</h1>
+        <section id="most-sold" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Aquí se insertarán dinámicamente los productos desde la API -->
+        </section>
+    </main>
+    <footer class="bg-zinc-800 text-white py-4 text-center">
+        <p>&copy; 2024 Fashion Website. Todos los derechos reservados.</p>
+    </footer>
+    <script src="../JS/app.js"></script>
+</body>
+</html>

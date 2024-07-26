@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Producto</title>
+    <!-- Cargar estilos de Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="/src/output.css">
+    <style>
+        .blur {
+            filter: blur(10px);
+        }
+
+        body {
+            /* Asegura que el fondo abarque toda la pantalla */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #6f7fd6, #4b4e6d);
+            /* Colores personalizados */
+            --purple-custom: #6f7fd6;
+            --black-custom: #4b4e6d;
+        }
+
+        #product-details {
+            /* Alinear el contenedor al centro */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* Ajustes adicionales si es necesario */
+            padding: 2rem;
+        }
+
+        .home-button {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-purple-custom to-black-custom bg-no-repeat text-white">
+
+    <div id="product-details" class="container mx-auto p-4 ">
+        <!-- Aquí se mostrarán los detalles del producto -->
+    </div>
+    
+    <!-- Botón para regresar a la página principal -->
+    <div class="home-button">
+
+    </div>
+
+    <script>
+        // Array para almacenar los productos en el carrito
+        document.addEventListener('DOMContentLoaded', function() {
+    // Array para almacenar los productos en el carrito
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Función para guardar el carrito en localStorage
+    function saveCart() {
+        localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    // Función para mostrar la alerta personalizada usando SweetAlert2
+    function showAlert(message, type) {
+        Swal.fire({
+            title: type === 'success' ? 'Éxito!' : 'Error!',
+            text: message,
+            icon: type,
+            confirmButtonText: 'Aceptar',
+            timer: 1500, // Ocultar la alerta después de 1.5 segundos
+            timerProgressBar: true,
+            showCloseButton: true
+        });
+    }
+
+    // Obtener el ID del producto de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    const apiKey = 'sk_test_575455ab0ec53162e74107638d95109373ae21b8f5f69';
+    const url = `https://api.chec.io/v1/products/${productId}`;
+
+    const options = {
+        method: 'GET',
+        headers: {
+            'X-Authorization': apiKey
+        }
+    };
+
+    fetch(url, options)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al obtener los datos del producto');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data); // Verificar la estructura de los datos
+            const product = data;
+
+            const productDetailsHTML = `
+                <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-4xl mx-auto text-black">
+                    <div class="flex flex-col md:flex-row">
+                        <!-- Imagen del Producto -->
+                        <div class="md:w-1/2 flex justify-center items-center">
+                            <img id="image-${product.id}" src="${product.image.url}" alt="${product.name}" class="h-96 w-96 object-contain rounded-md cursor-pointer transition duration-500 ease-in-out transform hover:scale-105" onclick="toggleBlur('image-${product.id}')">
+                        </div>
+                        <!-- Detalles del Producto -->
+                        <div class="md:w-1/2 mt-6 md:mt-0 md:ml-8 flex flex-col">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-4">${product.name}</h1>
+                            <p class="text-gray-600 mb-4">${product.description || product.seo.description || "Descripción no disponible"}</p>
+                            <p class="text-gray-800 font-semibold text-2xl mb-6">${product.price.formatted_with_symbol}</p>
+                            <button class="bg-orange-500 text-white py-3 mb-6 rounded-lg hover:bg-orange-800 active:bg-orange-400 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none add-to-cart" data-id="${product.id}" data-name="${product.name}" data-price="${product.price.raw}" data-image="${product.image.url}">Agregar al carrito</button>
+                            <button onclick="window.location.href='index.html'" class="bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none">Regresar a Home </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const productContainer = document.getElementById('product-details');
+            productContainer.innerHTML = productDetailsHTML;
+
+            // Escuchar clics en los botones de agregar al carrito
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const name = this.getAttribute('data-name');
+                    const price = parseFloat(this.getAttribute('data-price'));
+                    const image = this.getAttribute('data-image');
+
+                    cart.push({ id, name, price, image });
+                    saveCart();
+                    showAlert(`${name} ha sido agregado al carrito.`, 'success');
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const productContainer = document.getElementById('product-details');
+            productContainer.innerHTML = `<p>Error al cargar los detalles del producto.</p>`;
+            showAlert('Error al cargar los detalles del producto.', 'error');
+        });
+
+    function toggleBlur(imageId) {
+        const image = document.getElementById(imageId);
+        image.classList.toggle('blur');
+    }
+});
+
+    </script>
+
+</body>
+</html>
